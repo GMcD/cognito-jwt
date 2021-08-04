@@ -18,7 +18,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func ver_jwt(jwtB64 string) (bool, string) {
+func VerifyJWT(jwtB64 string) (bool, string) {
 
 	// Get the JWKs URL from your AWS region and userPoolId.
 	//
