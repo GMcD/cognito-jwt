@@ -1,4 +1,4 @@
-module projectscapa.com/jwt
+module github.com/GMcD/cognito-jwt
 
 go 1.16
 
