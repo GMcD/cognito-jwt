@@ -18,7 +18,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-func VerifyJWT(jwtB64 string) (bool, string) {
+func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 
 	// Get the JWKs URL from your AWS region and userPoolId.
 	//
@@ -48,19 +48,23 @@ func VerifyJWT(jwtB64 string) (bool, string) {
 	// Create the JWKs from the resource at the given URL.
 	jwks, err := keyfunc.Get(jwksURL, options)
 	if err != nil {
-		return false, fmt.Sprintf("Failed to create JWKs from resource at %s.\nError:%s\n", jwksURL, err.Error())
+		return nil, fmt.Errorf("Failed to create JWKs from resource at %s.\nError:%s\n", jwksURL, err.Error())
 	}
 
 	// Parse the JWT.
 	token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
 	if err != nil {
-		return false, fmt.Sprintf("Failed to parse the JWT.\nToken:%s\nError:%s\n", jwtB64, err.Error())
+		return nil, fmt.Errorf("Failed to parse the JWT.\nToken:%s\nError:%s\n", jwtB64, err.Error())
 	}
 
 	// Check if the token is valid.
 	if !token.Valid {
-		return false, fmt.Sprintf("The token is not valid.")
+		return nil, fmt.Errorf("The token is not valid.")
 	}
 
-	return true, "The token is valid."
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		return nil, fmt.Errorf("Token claim is not valid!")
+	}
 }
