@@ -6,7 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	// "github.com/golang-jwt/jwt"
+
+	"github.com/dgrijalva/jwt-go"
 
 	"github.com/MicahParks/keyfunc"
 )
