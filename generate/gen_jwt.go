@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/golang-jwt/jwt"
+	//"github.com/golang-jwt/jwt"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 func gen_jwt() {

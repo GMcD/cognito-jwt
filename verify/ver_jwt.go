@@ -1,6 +1,8 @@
 package verify
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +15,11 @@ import (
 	"github.com/MicahParks/keyfunc"
 )
 
+type person struct {
+	name string
+	age  int
+}
+
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
@@ -20,7 +27,22 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func GetBytes(key interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(key)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
+
+	bob := person{
+		name: "MacDonald, Bob",
+		age:  8,
+	}
 
 	// Get the JWKs URL from your AWS region and userPoolId.
 	//
@@ -54,7 +76,20 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 	}
 
 	// Parse the JWT.
-	token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
+	//token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
+
+	token, err := jwt.Parse(jwtB64, func(t *jwt.Token) (interface{}, error) {
+		jjj := jwks.KeyFunc
+		claims := t.Claims.(jwt.MapClaims)
+		log.Println(claims)
+		log.Println(claims["iss"])
+		log.Println(claims["name"])
+		log.Println(claims["email"])
+		log.Println(jjj)
+		log.Println(bob)
+		return bob, nil
+	})
+
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse the JWT.\nToken:%s\nError:%s\n", jwtB64, err.Error())
 	}
