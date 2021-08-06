@@ -65,19 +65,15 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 
 	// Parse the JWT.
 	token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
+	log.Println(token.Valid)
 
-	// token, err := jwt.Parse(jwtB64, func(t *jwt.Token) (interface{}, error) {
-	// 	claims := t.Claims.(jwt.MapClaims)
-	// 	log.Println(claims)
-	// 	log.Println(claims["iss"])
-	// 	log.Println(claims["name"])
-	// 	log.Println(claims["email"])
-	// 	return jwks.KeyFunc(t)
-	// 	// return claims, nil
-	// })
+	claims := token.Claims.(jwt.MapClaims)
+	log.Println(claims["iss"])
+	log.Println(claims["name"])
+	log.Println(claims["email"])
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to parse the JWT.\nToken:%s\nError:%s\n", jwtB64, err.Error())
+		return nil, fmt.Errorf("Token:%s\nError:%s\n", jwtB64, err.Error())
 	}
 
 	// Check if the token is valid.

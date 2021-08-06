@@ -14,7 +14,7 @@ func main() {
 	// parse it...
 	claim, err := verify.VerifyJWT(jwtB64)
 
-	if err != nil {
+	if err == nil {
 		log.Println("Token is valid!")
 		log.Println(claim)
 	} else {
