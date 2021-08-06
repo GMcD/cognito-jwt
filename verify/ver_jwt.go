@@ -8,17 +8,10 @@ import (
 	"os"
 	"time"
 
-	// "github.com/golang-jwt/jwt"
-
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/MicahParks/keyfunc"
 )
-
-type person struct {
-	name string
-	age  int
-}
 
 func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
@@ -39,11 +32,6 @@ func GetBytes(key interface{}) ([]byte, error) {
 
 func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 
-	bob := person{
-		name: "MacDonald, Bob",
-		age:  8,
-	}
-
 	// Get the JWKs URL from your AWS region and userPoolId.
 	//
 	// See the AWS docs here:
@@ -56,15 +44,15 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 	// is found or at the specified interval. Rate limit these refreshes. Timeout the initial JWKs refresh request after
 	// 10 seconds. This timeout is also used to create the initial context.Context for keyfunc.Get.
 	refreshInterval := time.Hour
-	refreshRateLimit := time.Minute * 5
+	// refreshRateLimit := time.Minute * 5
 	refreshTimeout := time.Second * 10
 	refreshUnknownKID := true
 	options := keyfunc.Options{
 		RefreshErrorHandler: func(err error) {
 			log.Printf("There was an error with the jwt.KeyFunc\nError:%s\n", err.Error())
 		},
-		RefreshInterval:   &refreshInterval,
-		RefreshRateLimit:  &refreshRateLimit,
+		RefreshInterval: &refreshInterval,
+		// RefreshRateLimit:  &refreshRateLimit,
 		RefreshTimeout:    &refreshTimeout,
 		RefreshUnknownKID: &refreshUnknownKID,
 	}
@@ -76,19 +64,17 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 	}
 
 	// Parse the JWT.
-	//token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
+	token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
 
-	token, err := jwt.Parse(jwtB64, func(t *jwt.Token) (interface{}, error) {
-		jjj := jwks.KeyFunc
-		claims := t.Claims.(jwt.MapClaims)
-		log.Println(claims)
-		log.Println(claims["iss"])
-		log.Println(claims["name"])
-		log.Println(claims["email"])
-		log.Println(jjj)
-		log.Println(bob)
-		return bob, nil
-	})
+	// token, err := jwt.Parse(jwtB64, func(t *jwt.Token) (interface{}, error) {
+	// 	claims := t.Claims.(jwt.MapClaims)
+	// 	log.Println(claims)
+	// 	log.Println(claims["iss"])
+	// 	log.Println(claims["name"])
+	// 	log.Println(claims["email"])
+	// 	return jwks.KeyFunc(t)
+	// 	// return claims, nil
+	// })
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to parse the JWT.\nToken:%s\nError:%s\n", jwtB64, err.Error())
@@ -100,6 +86,7 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		log.Println(claims)
 		return claims, nil
 	} else {
 		return nil, fmt.Errorf("Token claim is not valid!")
