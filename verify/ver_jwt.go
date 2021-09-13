@@ -67,11 +67,6 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(jwtB64, jwks.KeyFunc)
 	log.Println(token.Valid)
 
-	claims := token.Claims.(jwt.MapClaims)
-	log.Println(claims["iss"])
-	log.Println(claims["name"])
-	log.Println(claims["email"])
-
 	if err != nil {
 		return nil, fmt.Errorf("Token:%s\nError:%s\n", jwtB64, err.Error())
 	}
@@ -81,10 +76,12 @@ func VerifyJWT(jwtB64 string) (jwt.MapClaims, error) {
 		return nil, fmt.Errorf("The token is not valid.")
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		log.Println(claims)
-		return claims, nil
-	} else {
-		return nil, fmt.Errorf("Token claim is not valid!")
-	}
+	claims := token.Claims.(jwt.MapClaims)
+	log.Printf("iss : %s\n", claims["iss"])
+	log.Printf("name : %s\n", claims["name"])
+	log.Printf("email : %s\n", claims["email"])
+	log.Printf("cognito:username : %s\n", claims["cognito:username"])
+
+	return claims, nil
+
 }
